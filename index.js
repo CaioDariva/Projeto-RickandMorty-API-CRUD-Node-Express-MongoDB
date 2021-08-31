@@ -1,16 +1,21 @@
-// Configurações Express e MongoDB
+// Configurações Express, MongoDB e DotEnv
 const express = require("express");
 const mongodb = require("mongodb");
 const ObjectId = mongodb.ObjectId;
+require ("dotenv").config();
 
 (async () => {
-    // Configurações express e port
+    // Configurações Express, port e DotEnv
+    const dbHost = process.env.DB_HOST;
+    const dbPort = process.env.DB_PORT;
+    const dbName = process.env.DB_NAME;
     const app = express();
     app.use(express.json());
-    const port = 3000;
+    // process.env.port é usado para vim a porta da nuvem, por exemplo, para subir no heroku
+    const port = process.env.port || 3000;
     
     // Fazer conexão direta com o banco
-    const connectionString = `mongodb://localhost:27017/db_projetorick`
+    const connectionString = `mongodb://${dbHost}:${dbPort}/${dbName}`;
     const options = {
         useUnifiedTopology: true,
     };
