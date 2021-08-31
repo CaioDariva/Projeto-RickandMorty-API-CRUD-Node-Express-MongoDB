@@ -1,0 +1,28 @@
+{
+  "name": "projeto-rickandmorty-api-crud-node-express-mongodb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "dev": "nodemon index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CaioDariva/Projeto-RickandMorty-API-CRUD-Node-Express-MongoDB.git"
+  },
+  "author": "Caio Dariva",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CaioDariva/Projeto-RickandMorty-API-CRUD-Node-Express-MongoDB/issues"
+  },
+  "homepage": "https://github.com/CaioDariva/Projeto-RickandMorty-API-CRUD-Node-Express-MongoDB#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongodb": "^4.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
