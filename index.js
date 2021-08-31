@@ -37,6 +37,57 @@ require ("dotenv").config();
         res.send(await getPersonagensValidos())
     });
 
+    // Rota Get By Id
+    app.get("/personagens/:id", async (req, res) => {
+        const id = req.params.id;
+        const personagem = await getPersonagemById(id);
+        res.send(personagem);
+    });
+
+    // Rota Criar personagem
+    app.post("/personagens", async (req, res) => {
+        const objeto = req.body;
+        
+        if(!objeto || !objeto.nome || !objeto.imagemUrl){
+            res.send("Objeto Inválido")
+            return;
+        }
+        
+        const insertCount = await personagens.insertOne(objeto);
+    
+        if(!insertCount){
+            res.send("Ocorreu um erro");
+            return;
+        };
+        res.send(objeto);
+    });
+
+    // Rota para dar update no personagem
+    app.put("/personagens/:id", async (req, res) => {
+        const id = req.params.id;
+        const objeto = req.body;
+        res.send(
+            await personagens.updateOne(
+                {
+                    _id: ObjectId(id),
+                },
+                {
+                    $set: objeto,
+                }
+            )
+        );
+    });
+
+    // Rota para deletar o personagem
+    app.delete("/personagens/:id", async (req, res) => {
+        const id = req.params.id;
+
+        res.send(
+            await personagens.deleteOne({
+                _id: ObjectId(id),
+            })
+        );
+    });
 
 
     // Fazer a porta ser "ouvida"
