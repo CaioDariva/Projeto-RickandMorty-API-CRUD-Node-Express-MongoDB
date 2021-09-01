@@ -64,16 +64,16 @@ require ("dotenv").config();
         const objeto = req.body;
         
         if(!objeto || !objeto.nome || !objeto.imagemUrl){
-            res.send("Objeto Inválido")
+            res.send("Objeto Inválido");
             return;
-        }
-        
-        const insertCount = await personagens.insertOne(objeto);
-    
-        if(!insertCount){
+        };
+        // validação que reotorna true se foi inserido no banco
+        const result = await personagens.insertOne(objeto);
+        if(result.acknowledged == false) {
             res.send("Ocorreu um erro");
             return;
         };
+
         res.send(objeto);
     });
 
@@ -81,27 +81,64 @@ require ("dotenv").config();
     app.put("/personagens/:id", async (req, res) => {
         const id = req.params.id;
         const objeto = req.body;
-        res.send(
-            await personagens.updateOne(
-                {
-                    _id: ObjectId(id),
-                },
-                {
-                    $set: objeto,
-                }
-            )
+
+        // validação para ver se o que vem do body é válido
+        if(!objeto || !objeto.nome || !objeto.imagemUrl){
+            res.send("Objeto Inválido")
+            return;
+        };
+
+        // validação que retorna quantos objetos existem com o id passado, no caso se existe um id
+        const qntdPersonagens = await personagens.countDocuments({ 
+            _id: ObjectId(id),
+        });
+        if(qntdPersonagens !== 1) {
+            res.send("Personagem não encontrado!");
+            return;
+        };
+
+        // fazendo o update
+        const result = await personagens.updateOne(
+            {
+                _id: ObjectId(id),
+            },
+            {
+                $set: objeto,
+            }
         );
+
+        // validação para "avisar" quando tem algum problema no banco
+        if (result.modifiedCount !== 1) {
+            res.send("Ocorreu um erro ao atualizar o personagem.");
+            return;
+        };
+        res.send(await getPersonagemById(id));
     });
 
     // Rota para deletar o personagem
     app.delete("/personagens/:id", async (req, res) => {
         const id = req.params.id;
+        // validação que retorna quantos objetos existem com o id passado, no caso se existe um id
+        const qntdPersonagens = await personagens.countDocuments({ 
+            _id: ObjectId(id),
+        });
+        if(qntdPersonagens !== 1) {
+            res.send("Personagem não encontrado!");
+            return;
+        };
 
-        res.send(
-            await personagens.deleteOne({
+        const result = await personagens.deleteOne(
+            {
                 _id: ObjectId(id),
-            })
+            }
         );
+
+        if (result.deletedCount != 1) {
+            res.send("Ocorre um erro ao remover o personagem!");
+            return;
+        };
+
+        res.send("Personagem removido com sucesso!")
     });
 
 
