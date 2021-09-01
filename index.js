@@ -6,16 +6,17 @@ require ("dotenv").config();
 
 (async () => {
     // Configurações Express, port e DotEnv
+    const dbUser = process.env.DB_USER;
+    const dbPassword = process.env.DB_PASSWORD;
     const dbHost = process.env.DB_HOST;
-    const dbPort = process.env.DB_PORT;
-    const dbName = process.env.DB_NAME;
+    const dbChar = process.env.DB_CHAR;
     const app = express();
     app.use(express.json());
     // process.env.port é usado para vim a porta da nuvem, por exemplo, para subir no heroku
     const port = process.env.port || 3000;
     
     // Fazer conexão direta com o banco
-    const connectionString = `mongodb://${dbHost}:${dbPort}/${dbName}`;
+    const connectionString = `mongodb+srv://${dbUser}:${dbPassword}@caiomongo.${dbChar}.mongodb.net/${dbHost}?retryWrites=true&w=majority`;
     const options = {
         useUnifiedTopology: true,
     };
@@ -26,6 +27,20 @@ require ("dotenv").config();
     // Criar funções "padrões", que vão ser usadas em mais de uma rota, etc
     const getPersonagensValidos = () => personagens.find({}).toArray();
     const getPersonagemById = async (id) => personagens.findOne({_id: ObjectId(id)});
+
+    // CORS
+    app.all("/*", (req, res, next) => {
+		res.header("Access-Control-Allow-Origin", "*");
+
+		res.header("Access-Control-Allow-Methods", "*");
+
+		res.header(
+			"Access-Control-Allow-Headers",
+			"Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization"
+		);
+
+		next();
+	});
 
     // Rota Home
     app.get('/', (req, res) => {
