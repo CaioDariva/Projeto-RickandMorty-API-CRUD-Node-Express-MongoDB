@@ -3,6 +3,7 @@ const express = require("express");
 const mongodb = require("mongodb");
 const ObjectId = mongodb.ObjectId;
 require("dotenv").config();
+require('express-async-errors');
 
 (async () => {
   // Configurações Express, port e DotEnv
@@ -44,7 +45,8 @@ require("dotenv").config();
   });
 
   // Rota Home
-  app.get("/", (req, res) => {
+  app.get("/",  async (req, res) => {
+    const teste = undefined;
     res.send({ info: "Olá Mundo!" });
   });
 
@@ -57,6 +59,9 @@ require("dotenv").config();
   app.get("/personagens/:id", async (req, res) => {
     const id = req.params.id;
     const personagem = await getPersonagemById(id);
+    if(!personagem){
+      res.status(404).send({error: "O personagem especificado não foi encontrado."})
+    };
     res.send(personagem);
   });
 
@@ -65,17 +70,17 @@ require("dotenv").config();
     const objeto = req.body;
 
     if (!objeto || !objeto.nome || !objeto.imagemUrl) {
-      res.send("Objeto Inválido");
+      res.status(400).send({error: "Personagem inválido, certifique-se que possui o capo nome e imagemUrl"});
       return;
     }
-    // validação que reotorna true se foi inserido no banco
+    // validação que retorna true se foi inserido no banco, só entra se der erro no banco
     const result = await personagens.insertOne(objeto);
     if (result.acknowledged == false) {
-      res.send("Ocorreu um erro");
+      res.status(500).send({error: "Ocorreu um erro"});
       return;
     }
 
-    res.send(objeto);
+    res.status(201).send(objeto);
   });
 
   // Rota para dar update no personagem
@@ -85,7 +90,7 @@ require("dotenv").config();
 
     // validação para ver se o que vem do body é válido
     if (!objeto || !objeto.nome || !objeto.imagemUrl) {
-      res.send("Objeto Inválido");
+      res.status(400).send({error: "Personagem inválido, certifique-se que possui o capo nome e imagemUrl"});
       return;
     }
 
@@ -94,7 +99,7 @@ require("dotenv").config();
       _id: ObjectId(id),
     });
     if (qntdPersonagens !== 1) {
-      res.send("Personagem não encontrado!");
+      res.status(404).send({error: "Personagem não encontrado!"});
       return;
     }
 
@@ -109,8 +114,8 @@ require("dotenv").config();
     );
 
     // validação para "avisar" quando tem algum problema no banco
-    if (result.modifiedCount !== 1) {
-      res.send("Ocorreu um erro ao atualizar o personagem.");
+    if (result.acknowledged == "undefined") {
+      res.status(500).send({error: "Ocorreu um erro ao atualizar o personagem."});
       return;
     }
     res.send(await getPersonagemById(id));
@@ -124,7 +129,7 @@ require("dotenv").config();
       _id: ObjectId(id),
     });
     if (qntdPersonagens !== 1) {
-      res.send("Personagem não encontrado!");
+      res.status(404).send({error: "Personagem não encontrado!"});
       return;
     }
 
@@ -133,11 +138,28 @@ require("dotenv").config();
     });
 
     if (result.deletedCount != 1) {
-      res.send("Ocorre um erro ao remover o personagem!");
+      res.status(500).send({error: "Ocorre um erro ao remover o personagem!"});
       return;
     }
+    // quando não precisa retornar mensagem, o status pode vir denro do parenteses do send
+    res.send(204);
+  });
 
-    res.send("Personagem removido com sucesso!");
+  // tratamento de erros
+
+  // middleware para tratar todas as rotas , verifica endpoints
+  app.all("*", function(req,res) {
+    res.status(404).send({message: "End point was not found"})
+  });
+
+  // middleware tratamento de erro
+  app.use((error, req, res,next)=>{
+    res.status(error.status || 500).send({
+      error:{
+        status: error.status || 500,
+        message: error.message || "Internal server error",
+      },
+    });
   });
 
   // Fazer a porta ser "ouvida"
