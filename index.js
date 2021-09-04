@@ -3,7 +3,9 @@ const express = require("express");
 const mongodb = require("mongodb");
 const ObjectId = mongodb.ObjectId;
 require("dotenv").config();
-require('express-async-errors');
+require("express-async-errors");
+// requires de end points
+const home = require("./components/home/home");
 
 (async () => {
   // Configurações Express, port e DotEnv
@@ -45,10 +47,7 @@ require('express-async-errors');
   });
 
   // Rota Home
-  app.get("/",  async (req, res) => {
-    const teste = undefined;
-    res.send({ info: "Olá Mundo!" });
-  });
+  app.use("/home", home);
 
   // Rota Get All
   app.get("/personagens", async (req, res) => {
@@ -59,9 +58,11 @@ require('express-async-errors');
   app.get("/personagens/:id", async (req, res) => {
     const id = req.params.id;
     const personagem = await getPersonagemById(id);
-    if(!personagem){
-      res.status(404).send({error: "O personagem especificado não foi encontrado."})
-    };
+    if (!personagem) {
+      res
+        .status(404)
+        .send({ error: "O personagem especificado não foi encontrado." });
+    }
     res.send(personagem);
   });
 
@@ -70,13 +71,18 @@ require('express-async-errors');
     const objeto = req.body;
 
     if (!objeto || !objeto.nome || !objeto.imagemUrl) {
-      res.status(400).send({error: "Personagem inválido, certifique-se que possui o capo nome e imagemUrl"});
+      res
+        .status(400)
+        .send({
+          error:
+            "Personagem inválido, certifique-se que possui o capo nome e imagemUrl",
+        });
       return;
     }
     // validação que retorna true se foi inserido no banco, só entra se der erro no banco
     const result = await personagens.insertOne(objeto);
     if (result.acknowledged == false) {
-      res.status(500).send({error: "Ocorreu um erro"});
+      res.status(500).send({ error: "Ocorreu um erro" });
       return;
     }
 
@@ -90,7 +96,12 @@ require('express-async-errors');
 
     // validação para ver se o que vem do body é válido
     if (!objeto || !objeto.nome || !objeto.imagemUrl) {
-      res.status(400).send({error: "Personagem inválido, certifique-se que possui o capo nome e imagemUrl"});
+      res
+        .status(400)
+        .send({
+          error:
+            "Personagem inválido, certifique-se que possui o capo nome e imagemUrl",
+        });
       return;
     }
 
@@ -99,7 +110,7 @@ require('express-async-errors');
       _id: ObjectId(id),
     });
     if (qntdPersonagens !== 1) {
-      res.status(404).send({error: "Personagem não encontrado!"});
+      res.status(404).send({ error: "Personagem não encontrado!" });
       return;
     }
 
@@ -115,7 +126,9 @@ require('express-async-errors');
 
     // validação para "avisar" quando tem algum problema no banco
     if (result.acknowledged == "undefined") {
-      res.status(500).send({error: "Ocorreu um erro ao atualizar o personagem."});
+      res
+        .status(500)
+        .send({ error: "Ocorreu um erro ao atualizar o personagem." });
       return;
     }
     res.send(await getPersonagemById(id));
@@ -129,7 +142,7 @@ require('express-async-errors');
       _id: ObjectId(id),
     });
     if (qntdPersonagens !== 1) {
-      res.status(404).send({error: "Personagem não encontrado!"});
+      res.status(404).send({ error: "Personagem não encontrado!" });
       return;
     }
 
@@ -138,7 +151,9 @@ require('express-async-errors');
     });
 
     if (result.deletedCount != 1) {
-      res.status(500).send({error: "Ocorre um erro ao remover o personagem!"});
+      res
+        .status(500)
+        .send({ error: "Ocorre um erro ao remover o personagem!" });
       return;
     }
     // quando não precisa retornar mensagem, o status pode vir denro do parenteses do send
@@ -148,14 +163,14 @@ require('express-async-errors');
   // tratamento de erros
 
   // middleware para tratar todas as rotas , verifica endpoints
-  app.all("*", function(req,res) {
-    res.status(404).send({message: "End point was not found"});
+  app.all("*", function (req, res) {
+    res.status(404).send({ message: "End point was not found" });
   });
 
   // middleware tratamento de erro
-  app.use((error, req, res, next)=>{
+  app.use((error, req, res, next) => {
     res.status(error.status || 500).send({
-      error:{
+      error: {
         status: error.status || 500,
         message: error.message || "Internal server error",
       },
@@ -164,6 +179,6 @@ require('express-async-errors');
 
   // Fazer a porta ser "ouvida"
   app.listen(port, () => {
-    console.log(`App rodando em http://localhost:${port}`);
+    console.log(`App rodando em http://localhost:${port}/home`);
   });
 })();
