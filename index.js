@@ -147,7 +147,7 @@ require('express-async-errors');
 
   // tratamento de erros
 
-/*   // middleware para tratar todas as rotas , verifica endpoints
+  // middleware para tratar todas as rotas , verifica endpoints
   app.all("*", function(req,res) {
     res.status(404).send({message: "End point was not found"});
   });
@@ -160,7 +160,7 @@ require('express-async-errors');
         message: error.message || "Internal server error",
       },
     });
-  }); */
+  });
 
   // Fazer a porta ser "ouvida"
   app.listen(port, () => {
