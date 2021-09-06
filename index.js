@@ -16,13 +16,14 @@ const home = require("./components/home/home");
   const app = express();
   app.use(express.json());
   // process.env.port é usado para vim a porta da nuvem, por exemplo, para subir no heroku
-  const port = process.env.port || 3000;
+  const port = process.env.PORT || 3000;
 
   // Fazer conexão direta com o banco
   const connectionString = `mongodb+srv://${dbUser}:${dbPassword}@caiomongo.${dbChar}.mongodb.net/${dbHost}?retryWrites=true&w=majority`;
   const options = {
     useUnifiedTopology: true,
   };
+  console.info("Conectando ao MongoDB Atlas...")
   const client = await mongodb.MongoClient.connect(connectionString, options);
   const db = client.db("db_projetorick");
   const personagens = db.collection("personagens");
@@ -151,9 +152,7 @@ const home = require("./components/home/home");
     });
 
     if (result.deletedCount != 1) {
-      res
-        .status(500)
-        .send({ error: "Ocorre um erro ao remover o personagem!" });
+      res.status(500).send({ error: "Ocorre um erro ao remover o personagem!" });
       return;
     }
     // quando não precisa retornar mensagem, o status pode vir denro do parenteses do send
