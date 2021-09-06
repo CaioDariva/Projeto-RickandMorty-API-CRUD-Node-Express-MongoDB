@@ -6,6 +6,7 @@ require("dotenv").config();
 require("express-async-errors");
 // requires de end points
 const home = require("./components/home/home");
+const cors = require("cors");
 
 (async () => {
   // Configurações Express, port e DotEnv
@@ -33,8 +34,8 @@ const home = require("./components/home/home");
   const getPersonagemById = async (id) =>
     personagens.findOne({ _id: ObjectId(id) });
 
-  // CORS
-  app.all("/*", (req, res, next) => {
+  // CORS ANTIGO
+ /*  app.all("/*", (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
 
     res.header("Access-Control-Allow-Methods", "*");
@@ -45,7 +46,11 @@ const home = require("./components/home/home");
     );
 
     next();
-  });
+  }); */
+
+  // CORS NOVO
+  app.use(cors()); 
+  app.options("*", cors());
 
   // Rota Home
   app.use("/home", home);
