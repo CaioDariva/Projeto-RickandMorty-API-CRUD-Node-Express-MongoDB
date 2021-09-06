@@ -156,10 +156,12 @@ const cors = require("cors");
       _id: ObjectId(id),
     });
 
-    if (result.deletedCount != 1) {
-      res.status(500).send({ error: "Ocorre um erro ao remover o personagem!" });
-      return;
-    }
+    if (result.deletedCount !== 1) {
+			res
+				.status(500)
+				.send({ error: "Ocorreu um erro ao remover o personagem" });
+			return;
+		};
     // quando não precisa retornar mensagem, o status pode vir denro do parenteses do send
     res.send(204);
   });
