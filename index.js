@@ -6,6 +6,7 @@ require("dotenv").config();
 require("express-async-errors");
 // requires de end points
 const home = require("./components/home/home");
+const readById = require("./components/read-by-id/read-by-id");
 const cors = require("cors");
 
 (async () => {
@@ -60,8 +61,8 @@ const cors = require("cors");
     res.send(await getPersonagensValidos());
   });
 
-  // Rota Get By Id
-  app.get("/personagens/:id", async (req, res) => {
+  // Rota Get By Id VELHA
+/*   app.get("/personagens/:id", async (req, res) => {
     const id = req.params.id;
     const personagem = await getPersonagemById(id);
     if (!personagem) {
@@ -70,7 +71,10 @@ const cors = require("cors");
         .send({ error: "O personagem especificado não foi encontrado." });
     }
     res.send(personagem);
-  });
+  }); */
+
+  // Rota Get By Id pegando do components
+  app.use("/personagens/read-by-id/", readById);
 
   // Rota Criar personagem
   app.post("/personagens", async (req, res) => {
