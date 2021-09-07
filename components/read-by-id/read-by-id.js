@@ -36,7 +36,7 @@ const router = express.Router();
         .status(404)
         .send({ error: "O personagem especificado não foi encontrado" });
       return;
-    }
+    };
     res.send(personagem);
   });
 })();
