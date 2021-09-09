@@ -21,34 +21,50 @@ const ObjectId = mongodb.ObjectId;
   const db = client.db(dbHost);
   const personagens = db.collection(dbCollection);
 
+  const getPersonagemById = async (id) =>
+    personagens.findOne({ _id: ObjectId(id) });
+
   router.use(function (req, res, next) {
     next();
   });
 
-  router.delete("/:id", async (req, res) => {
+  router.put("/:id", async (req, res) => {
     const id = req.params.id;
+    const objeto = req.body;
+
+    if (!objeto || !objeto.nome || !objeto.imagemUrl) {
+      res.status(400).send({
+        error: "Requisição inválida, obrigatório os campos nome e imagemUrl",
+      });
+      return;
+    }
 
     const quantidadePersonagens = await personagens.countDocuments({
       _id: ObjectId(id),
     });
 
     if (quantidadePersonagens !== 1) {
-      res.status(404).send({ error: "Personagem não encontrado" });
+      res.status(404).send("Personagem não encontrado");
       return;
     }
 
-    const result = await personagens.deleteOne({
-      _id: ObjectId(id),
-    });
+    const result = await personagens.updateOne(
+      {
+        _id: ObjectId(id),
+      },
+      {
+        $set: objeto,
+      }
+    );
 
-    if (result.deletedCount !== 1) {
+    if (result.acknowledged == "undefined") {
       res
         .status(500)
-        .send({ error: "Ocorreu um erro ao remover o personagem" });
+        .send({ error: "Ocorreu um erro ao atualizar o personagem" });
       return;
     }
 
-    res.sendStatus(204);
+    res.send(await getPersonagemById(id));
   });
 })();
 
